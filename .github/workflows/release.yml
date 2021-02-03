@@ -21,8 +21,10 @@ jobs:
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
+    - id: tag
+      uses: dawidd6/action-get-tag@v1
     - run: cargo +nightly build --release
     - uses: actions/upload-artifact@v2
       with:
-        name: synth-${{ github.ref }}-${{ matrix.os }}-x86_64
+        name: synth-${{ steps.tag.outputs.tag }}-${{ matrix.os }}-x86_64
         path: target/release/synth
