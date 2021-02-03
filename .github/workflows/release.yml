@@ -23,11 +23,15 @@ jobs:
         toolchain: nightly
     - id: tag
       uses: dawidd6/action-get-tag@v1
-    - run: cargo +nightly build --release
+    #- run: cargo +nightly build --release
+    - run: |
+        mkdir -p target/release/
+        echo "Hey, don't run this" > target/release/synth
+    - run: tar -czf target/release/synth.tar.gz target/release/synth
     - uses: actions/upload-artifact@v2
       with:
-        name: synth-${{ steps.tag.outputs.tag }}-${{ matrix.os }}-x86_64
-        path: target/release/synth
+        name: synth-${{ steps.tag.outputs.tag }}-${{ matrix.os }}-x86_64.tar.gz
+        path: target/release/synth.tar.gz
 
   release:
     name: release
@@ -37,6 +41,8 @@ jobs:
     - id: tag
       uses: dawidd6/action-get-tag@v1
     - uses: actions/download-artifact@v2
+      with:
+        path: ./
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -54,8 +60,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./synth-${{ steps.tag.outputs.tag }}-ubuntu-latest-x86_64
-        asset_name: synth-${{ steps.tag.outputs.tag }}-ubuntu-latest-x86_64
+        asset_path: ./synth-${{ steps.tag.outputs.tag }}-ubuntu-latest-x86_64.tar.gz
+        asset_name: synth-${{ steps.tag.outputs.tag }}-ubuntu-latest-x86_64.tar.gz
         asset_content_type: application/octet-stream
     - name: Upload Release Asset (MacOS)
       id: upload-release-asset-macos
@@ -64,6 +70,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./synth-${{ steps.tag.outputs.tag }}-macos-latest-x86_64
-        asset_name: synth-${{ steps.tag.outputs.tag }}-macos-latest-x86_64
+        asset_path: ./synth-${{ steps.tag.outputs.tag }}-macos-latest-x86_64.tar.gz
+        asset_name: synth-${{ steps.tag.outputs.tag }}-macos-latest-x86_64.tar.gz
         asset_content_type: application/octet-stream
