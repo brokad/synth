@@ -50,7 +50,7 @@ jobs:
         release_name: ${{ steps.tag.outputs.tag }}
         draft: true
         prerelease: false
-    - run: echo ${{ steps.create_release.outputs.upload_url }} > upload_url
+    - run: echo '${{ steps.create_release.outputs.upload_url }}' > upload_url
     - uses: actions/upload-artifact@v2
       with:
         name: upload_url
