@@ -1,0 +1,28 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Upload Release Asset
+
+jobs:
+
+  build-linux:
+    name: build 
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+        - macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+    - run: cargo +nightly build --release
+    - uses: actions/upload-artifact@v2
+      with:
+        name: synth-${{ github.ref }}-${{ matrix.os }}-x86_64
+        path: target/release/synth
