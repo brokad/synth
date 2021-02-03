@@ -51,6 +51,10 @@ jobs:
         draft: true
         prerelease: false
     - run: echo ${{ steps.create_release.outputs.upload_url }} > upload_url
+    - uses: actions/upload-artifact@v2
+      with:
+        name: upload_url
+        path: ./upload_url
 
   upload:
     name: upload
