@@ -20,4 +20,4 @@ jobs:
           name: getsynth
           authToken: ${{ secrets.CACHIX_TOKEN }}
       - name: Build synth
-        run: nix-build nix/release.nix
+        run: nix-build tools/install.nix
