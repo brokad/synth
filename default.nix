@@ -11,6 +11,7 @@
 , ncurses6
 , libiconv
 , darwin
+, src ? null
 , release ? true
 }:
 let
@@ -27,7 +28,7 @@ let
     name = "synth-unwrapped${suffix}";
     inherit version;
 
-    src = ./.;
+    src = if src == null then ./. else src;
 
     preferLocalBuild = true;
 

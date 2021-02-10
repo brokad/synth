@@ -1,4 +1,6 @@
-FROM nixos/nix
+FROM gcr.io/cloudshell-images/cloudshell:latest
+RUN curl -L https://nixos.org/nix/install | sh
+RUN . $HOME/.nix-profile/etc/profile.d/nix.sh
 RUN nix-env -iA cachix -f https://cachix.org/api/v1/install
 RUN cachix use getsynth
 
