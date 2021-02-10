@@ -1,0 +1,23 @@
+name: synth public cachix
+
+on:
+  push:
+    branches:
+      # TODO
+      - feat/dockerfile
+
+jobs:
+  cachix:
+    name: synth public cachix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install nix
+        uses: cachix/install-nix-action@v12
+      - name: Setup cachix
+        uses: cachix/cachix-action@v8
+        with:
+          name: getsynth
+          authToken: ${{ secrets.CACHIX_TOKEN }}
+      - name: Build synth
+        run: nix-build nix/release.nix
