@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 
+SYNTH_REPO=${SYNTH_REPO:-https://github.com/brokad/synth}
 SYNTH_VERSION=${SYNTH_VERSION:-latest}
-SYNTH_INSTALLER=https://github.com/brokad/synth/releases/$SYNTH_VERSION/download/install-nix
-
-BUG_REPORT_URL="https://github.com/openquery-io/synth/issues/new?assignees=&labels=bug&template=bug_report.md&title="
+SYNTH_INSTALLER=$SYNTH_REPO/releases/$SYNTH_VERSION/download/install-nix
+BUG_REPORT_URL="$SYNTH_REPO/issues/new?assignees=&labels=bug&template=bug_report.md&title="
+GETTING_STARTED=https://openquery-io.github.io/synth/hello-world
 
 oops() {
     log $@
     exit 1
 }
 
+uncaught() {
+    oops "got $?.\n\nCould not install synth. Let us know what went wrong by opening a GitHub issue and copy/pasting the logs:\n\n\t$BUG_REPORT_URL\n"
+}
+
 log() {
-    echo "$0:" "$@" >&2
+    echo -e "$0:" "$@" >&2
 }
 
 check_util() {
@@ -53,6 +58,7 @@ ensure_synth() {
 	log "synth is already installed, nothing to do"
 	exit 0
     else
+	trap 'uncaught $? $LINENO' ERR
 	ensure_nix
 	ensure_cachix
 	ensure_utils
@@ -60,22 +66,25 @@ ensure_synth() {
 	# Flow for `nix < 2.4`: Because `nix-env -f` does not seem to
 	# support HTTP redirects and the default github artifact
 	# release URL redirects to a one-time S3 URL.
-	{
-	    WORKDIR=$(mktemp -d)
-	    pushd $WORKDIR
-	    curl -Ls --output install-nix $SYNTH_INSTALLER
-	    tar -xf install-nix
-	    nix-env -iA synth -f default.nix
-	    popd
-	    rm -r $WORKDIR
-	} || oops "could not install synth, sorry!\nPlease let us know what went wrong by opening an issue on GitHub: $BUG_REPORT_URL"
+	WORKDIR=$(mktemp -d)
+	pushd $WORKDIR
+	curl -Ls --output install-nix $SYNTH_INSTALLER
+	tar -xf install-nix
+	nix-env -iA synth -f default.nix
+	popd
+	rm -r $WORKDIR
 
 	if [[ ! -z "$CLOUDSHELL_ENVIRONMENT" ]]; then
 	    # Assuming GCP Cloud Shell
-	    log "seems to be running in a GCP Cloud Shell, symlinking 'synth' into your ~/.local/bin"
+	    log "we seem to be running in a GCP Cloud Shell, symlinking 'synth' into your ~/.local/bin"
+	    if [ -f $HOME/.local/bin/synth ]; then
+		rm $HOME/.local/bin/synth
+	    fi
 	    ln -s $HOME/.nix-profile/bin/synth $HOME/.local/bin/synth 2>&1 > /dev/null
 	fi
     fi
 }
 
 ensure_synth
+
+log "synth is ready to roll!\n\nGet started by heading over to:\n\n\t$GETTING_STARTED\n"
