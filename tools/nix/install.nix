@@ -7,4 +7,6 @@ let
     url = "https://github.com/brokad/synth.git";
     inherit ref rev;
   };
-in (import "${src}/nix/release.nix" {}).override { inherit src; }
+in {
+  synth = (import "${src}/nix/release.nix" {}).override { inherit src; };
+}
