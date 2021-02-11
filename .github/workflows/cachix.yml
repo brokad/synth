@@ -22,4 +22,4 @@ jobs:
           name: getsynth
           authToken: ${{ secrets.CACHIX_TOKEN }}
       - name: Build synth
-        run: nix-build tools/install.nix --argstr ref $GITHUB_REF --argstr rev $GITHUB_SHA
+        run: nix-build tools/nix/install.nix --argstr ref $GITHUB_REF --argstr rev $GITHUB_SHA
