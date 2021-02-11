@@ -53,15 +53,20 @@ ensure_utils() {
     fi
 }
 
+ensure_path() {
+    echo $PATH | grep $HOME/.nix-profile/bin 2>&1 > /dev/null
+}
+
 ensure_synth() {
     if check_util "synth"; then
 	log "synth is already installed, nothing to do"
 	exit 0
     else
-	trap 'uncaught $? $LINENO' ERR
 	ensure_nix
 	ensure_cachix
 	ensure_utils
+
+	trap 'uncaught $? $LINENO' ERR
 
 	# Flow for `nix < 2.4`: Because `nix-env -f` does not seem to
 	# support HTTP redirects and the default github artifact
@@ -80,7 +85,13 @@ ensure_synth() {
 	    if [ -f $HOME/.local/bin/synth ]; then
 		rm $HOME/.local/bin/synth
 	    fi
+	    mkdir -p $HOME/.local/bin
 	    ln -s $HOME/.nix-profile/bin/synth $HOME/.local/bin/synth 2>&1 > /dev/null
+
+	    ensure_path
+	    if [ ! -z $? ]; then
+		log "WARNING: $HOME/.local/bin is not in \$PATH. You may need to restart your current shell before you can use synth."
+	    fi
 	fi
     fi
 }
