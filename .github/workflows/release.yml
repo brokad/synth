@@ -7,33 +7,8 @@ on:
 name: Upload Release Asset
 
 jobs:
-
-  build:
-    name: build 
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-        - ubuntu-latest
-        - macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly
-    - id: tag
-      uses: dawidd6/action-get-tag@v1
-    - run: cargo +nightly build --release
-    - working-directory: target/release
-      run: tar -czf synth.tar.gz synth
-    - uses: actions/upload-artifact@v2
-      with:
-        name: synth-${{ steps.tag.outputs.tag }}-${{ matrix.os }}-x86_64
-        path: target/release/synth.tar.gz
-
   release:
     name: release
-    needs: [ build ]
     runs-on: ubuntu-latest
     steps:
     - id: tag
@@ -54,15 +29,10 @@ jobs:
         name: upload_url
         path: ./upload_url
 
-  upload:
-    name: upload
+  upload-nix-installer:
+    name: upload-nix-installer
     needs: [ release ]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os:
-        - ubuntu-latest
-        - macos-latest
     steps:
     - uses: actions/download-artifact@v2
       with:
@@ -70,20 +40,22 @@ jobs:
         path: ./
     - id: release
       run: echo "##[set-output name=upload_url;]$(cat upload_url)"
-    - id: tag
-      uses: dawidd6/action-get-tag@v1
-    - uses: actions/download-artifact@v2
-      with:
-        name: synth-${{ steps.tag.outputs.tag }}-${{ matrix.os }}-x86_64
-        path: ./
-    - run: ls
+    - working-directory: tools/nix
+      run: |
+        cp install.nix default.nix
+        sed -i \
+            -e "s|master|$GITHUB_REF|g" \
+            -e "s|HEAD|$GITHUB_SHA|g" \
+            default.nix
+        tar -cvf install-nix default.nix
     - name: Upload Release Asset
       id: upload-release-asset
       uses: actions/upload-release-asset@v1
+      working-directory: tools/nix
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.release.outputs.upload_url }} 
-        asset_path: ./synth.tar.gz
-        asset_name: synth-${{ matrix.os }}-x86_64.tar.gz
+        asset_path: ./install-nix
+        asset_name: install-nix
         asset_content_type: application/octet-stream

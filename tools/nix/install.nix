@@ -1,6 +1,6 @@
 {
-  ref ? "feat/dockerfile"
-, rev ? "11acb9d901646b04354dbf44a6acafec3bbf7d3f"
+  ref ? "master"
+, rev ? "HEAD"
 }:
 let
   src = builtins.fetchGit {
