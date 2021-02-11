@@ -56,6 +56,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.release.outputs.upload_url }} 
-        asset_path: ./install-nix
+        asset_path: ./tools/nix/install-nix
         asset_name: install-nix
         asset_content_type: application/octet-stream
