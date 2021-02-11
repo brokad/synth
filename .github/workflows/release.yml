@@ -42,6 +42,7 @@ jobs:
       run: echo "##[set-output name=upload_url;]$(cat upload_url)"
     - working-directory: tools/nix
       run: |
+        ls
         cp install.nix default.nix
         sed -i \
             -e "s|master|$GITHUB_REF|g" \
