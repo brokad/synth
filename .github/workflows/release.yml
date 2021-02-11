@@ -34,14 +34,13 @@ jobs:
     needs: [ release ]
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - uses: actions/download-artifact@v2
       with:
         name: upload_url
         path: ./
     - id: release
       run: echo "##[set-output name=upload_url;]$(cat upload_url)"
-    - working-directory: tools/nix
-      run: ls
     - working-directory: tools/nix
       run: |
         cp install.nix default.nix
