@@ -374,7 +374,6 @@ impl<'de> Deserialize<'de> for FieldRef {
         D: serde::Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        println!("deserialized {}", s);
         FromStr::from_str(&s).map_err(de::Error::custom)
     }
 }
